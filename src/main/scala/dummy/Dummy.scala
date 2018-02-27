@@ -30,7 +30,8 @@ object Dummy {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  case class Chain(messages:List[String],depth:Int)
+  case class Check(status:String)
+  case class Chain(messages:List[String],depth:Int=2)
 
   def remoteCall(chain:Chain, uri:String):Future[HttpResponse] = {
     Marshal(chain).to[RequestEntity].flatMap{ entity =>
@@ -39,6 +40,7 @@ object Dummy {
   }
 
   def main(args:Array[String]) {
+    val checkRoute = pathSingleSlash {get { complete { Check("OK")}}}
     val chainRoute =
       path("chain") {
         post {
@@ -47,14 +49,15 @@ object Dummy {
             Kamon.currentSpan().tag("current-depth", depth.toString)
             val newMessage = s"loopback $depth"
             val newChain=chain.copy(newMessage::chain.messages, depth-1)
+            val targetURI= "http://localhost:8080/chain"
             if (depth>1) {
-              complete { remoteCall(newChain, "http://localhost:8080/chain") }
+              complete { remoteCall(newChain, targetURI) }
             } else {
               complete { newChain }
             }
           }
         }
       }
-    val bindingFuture = Http().bindAndHandle(chainRoute, "0.0.0.0", 8080)
+    val bindingFuture = Http().bindAndHandle(checkRoute~chainRoute, "0.0.0.0", 8080)
   }
 }
