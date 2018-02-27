@@ -52,10 +52,10 @@ This small challenge will show your various tools in action :
 ### Step 2 - Start the app
 
 * Starts the http asynchronous server :
-  + `sbt run`
+    + `sbt run`
 * Check if it works fine
-  + `curl http://localhost:8080`
-    - should return `{"status":"OK"}`
+    + `curl http://localhost:8080`
+        - should return `{"status":"OK"}`
 
 ---
 
@@ -63,12 +63,13 @@ This small challenge will show your various tools in action :
 ### Step 3 - Debug phasis
 
 * Check your connectivity with your neighbor
-  ```bash
-   curl -vs \
-     -H 'content-type: application/json' \
-     -d '{"messages":[]}' \ 
-     http://localhost:8080/chain
-  ```
+    ```bash
+     curl -vs \
+       -H 'content-type: application/json' \
+       -d '{"messages":[]}' \
+       http://localhost:8080/chain
+    ```
+
 * If something goes wrong we'll have to add logs...
   + Or check prometheus end point :
     - http://localhost:9095/
