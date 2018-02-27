@@ -88,6 +88,7 @@ This small challenge will show your various tools in action :
 
 ## Notes
 ### Start Jaeger
+
 ```
 docker run -d \
    --name jaeger \
@@ -101,6 +102,38 @@ docker run -d \
    -p9411:9411 \
    jaegertracing/all-in-one:latest
 ```
+
+Browse to IP:14268 to reach the Jaeger user interface.
+
+---
+
+## Notes
+### Start Prometheus & grafana
+
+A simple prometheus.yml file for this app is in the git repository
+root directory. **TAKE CARE WITH THE IP INSIDE THIS FILE**
+
+```bash
+docker run -d -p 9090:9090 \
+   --name kapromotheus \
+   -v $PWD/prometheus.yml:/etc/prometheus/prometheus.yml \
+   prom/prometheus
+
+docker run -d --name=grafana -p 3000:3000 grafana/grafana
+```
+
+---
+
+## Notes
+### Prometheus/grafana queries example
+
+```
+rate(akka_http_server_open_connections_sum[5m])
+rate(akka_http_server_active_requests_sum[5m])
+rate(akka_system_active_actors_sum[5m])
+
+```
+
 
 ---
 
