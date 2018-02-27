@@ -30,8 +30,6 @@ object Dummy {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  val usageCounter = Kamon.counter("usage.counter")
-
   case class Chain(messages:List[String],depth:Int)
 
   def remoteCall(chain:Chain, uri:String):Future[HttpResponse] = {
@@ -45,25 +43,14 @@ object Dummy {
       path("chain") {
         post {
           entity(as[Chain]) { chain =>
-            usageCounter.increment
             val depth=chain.depth
-            val span = Kamon.buildSpan("chaining").start()
-            span.tag("current-depth", depth.toString)
+            Kamon.currentSpan().tag("current-depth", depth.toString)
             val newMessage = s"loopback $depth"
             val newChain=chain.copy(newMessage::chain.messages, depth-1)
-            if (depth>0) {
-              val inprogress = remoteCall(newChain, "http://localhost:8080/chain")
-              inprogress.andThen { case _ =>
-                span.tag("status", "continuing").finish()
-              }
-              onComplete(inprogress) { resp =>
-                complete(resp)
-              }
+            if (depth>1) {
+              complete { remoteCall(newChain, "http://localhost:8080/chain") }
             } else {
-              complete {
-                span.tag("status","finished").finish()
-                newChain
-              }
+              complete { newChain }
             }
           }
         }
