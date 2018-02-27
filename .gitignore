@@ -1,0 +1,15 @@
+*.jar
+*.class
+dist/*
+target/
+*.pscala
+*~
+.classpath
+.project
+.cache
+.settings
+.ensime
+.DS_Store
+dummy.log
+.idea
+
