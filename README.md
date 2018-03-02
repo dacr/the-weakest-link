@@ -86,7 +86,7 @@ This small challenge will show your various tools in action :
 
 ---
 
-## Notes
+## Notes for the game administrators
 ### Start Jaeger
 
 ```
@@ -103,7 +103,7 @@ docker run -d \
    jaegertracing/all-in-one:latest
 ```
 
-Browse to IP:14268 to reach the Jaeger user interface.
+Browse to IP:16686 to reach the Jaeger user interface.
 
 ---
 
@@ -124,7 +124,7 @@ docker run -d --name=grafana -p 3000:3000 grafana/grafana
 
 ---
 
-## Notes
+## Notes for the game administrators
 ### Prometheus/grafana queries example
 
 ```
@@ -137,7 +137,7 @@ rate(akka_system_active_actors_sum[5m])
 
 ---
 
-## Notes
+## Notes for the game administrators
 ### Full chain request
 
 ```bash
