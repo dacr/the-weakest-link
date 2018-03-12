@@ -90,13 +90,13 @@ This small challenge will show your various tools in action :
 docker run -d \
    --name jaeger \
    -e COLLECTOR_ZIPKIN_HTTP_PORT=9411 \
-   -p5775:5775/udp \
-   -p6831:6831/udp \
-   -p6832:6832/udp \
-   -p5778:5778 \
-   -p16686:16686 \
-   -p14268:14268 \
-   -p9411:9411 \
+   -p 0.0.0.0:5775:5775/udp \
+   -p 0.0.0.0:6831:6831/udp \
+   -p 0.0.0.0:6832:6832/udp \
+   -p 0.0.0.0:5778:5778 \
+   -p 0.0.0.0:16686:16686 \
+   -p 0.0.0.0:14268:14268 \
+   -p 0.0.0.0:9411:9411 \
    jaegertracing/all-in-one:latest
 ```
 
@@ -111,12 +111,12 @@ A simple prometheus.yml file for this app is in the git repository
 root directory. **TAKE CARE WITH THE IP INSIDE THIS FILE**
 
 ```bash
-docker run -d -p 9090:9090 \
+docker run -d -p 0.0.0.0:9090:9090 \
    --name kapromotheus \
    -v $PWD/prometheus.yml:/etc/prometheus/prometheus.yml \
    prom/prometheus
 
-docker run -d --name=grafana -p 3000:3000 grafana/grafana
+docker run -d --name=grafana -p 0.0.0.0:3000:3000 grafana/grafana
 ```
 
 ---
