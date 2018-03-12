@@ -50,7 +50,10 @@ object Dummy {
 
   def myStoryPart:String = {
     val storyFile = file"myStoryPart.txt"
-    if (!storyFile.exists) { storyFile.createIfNotExists().appendText("undefined")}
+    if (!storyFile.exists) {
+      val hostname=java.net.InetAddress.getLocalHost.getHostName
+      storyFile.createIfNotExists().appendText(s"undefined-$hostname")
+    }
     storyFile.lines.map(_.trim).mkString(" ")
   }
   val myNeighborIp = "localhost"       // TODO : Change with your neighbor IP
