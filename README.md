@@ -43,8 +43,8 @@ This small challenge will show your various tools in action :
   + change `kamon.environment.service` to your CUID 
   + Change jaeger IP from `localhost` to the IP we gave you
 * Edit `src/main/scala/dummy/Dummy.scala`
-  + Change `newMessage` text to what ever you want (with humor)
-  + Change `targetURI` localhost to the IP of your nearest neighbor 
+  + Change `myStoryPart` text to what ever you want (with humor)
+  + Change `myNeighborIp` localhost to the IP of your nearest neighbor 
 
 ---
 
@@ -143,6 +143,6 @@ rate(akka_system_active_actors_sum[5m])
 ```bash
 curl -s \
   -H 'content-type: application/json'   \
-  -d '{"messages":["boot"], "depth":99}' \
+  -d '{"maxDepth":2}' \
   http://localhost:8080/chain | jq
 ```

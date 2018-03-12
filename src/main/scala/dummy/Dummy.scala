@@ -6,6 +6,7 @@ import akka.http.scaladsl._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshalling.Marshal
+import akka.http.scaladsl.unmarshalling.Unmarshal
 
 import kamon.Kamon
 import kamon.jaeger.JaegerReporter
@@ -31,33 +32,48 @@ object Dummy {
   implicit val executionContext = system.dispatcher
 
   case class Check(status:String)
-  case class Chain(messages:List[String],depth:Int=2)
+  case class ChainUpstream(maxDepth:Int=2, currentDepth:Int=0)
+  case class ChainDownstream(story:String)
 
-  def remoteCall(chain:Chain, uri:String):Future[HttpResponse] = {
-    Marshal(chain).to[RequestEntity].flatMap{ entity =>
+  def remoteCall(up:ChainUpstream, uri:String):Future[HttpResponse] = {
+    Marshal(up).to[RequestEntity].flatMap{ entity =>
       Http().singleRequest(HttpRequest(uri = uri, method = HttpMethods.POST, entity = entity))
     }
   }
 
-  def main(args:Array[String]) {
-    val checkRoute = pathSingleSlash {get { complete { Check("OK")}}}
-    val chainRoute =
-      path("chain") {
-        post {
-          entity(as[Chain]) { chain =>
-            val depth=chain.depth
-            Kamon.currentSpan().tag("current-depth", depth.toString)
-            val newMessage = s"loopback $depth"
-            val newChain=chain.copy(newMessage::chain.messages, depth-1)
-            val targetURI= "http://localhost:8080/chain"
-            if (depth>1) {
-              complete { remoteCall(newChain, targetURI) }
-            } else {
-              complete { newChain }
+  def myStoryPart = "... "             // TODO :
+
+  val myNeighborIp = "127.0.0.1"       // TODO :
+
+  val myNeighBorTargetURI= s"http://$myNeighborIp:8080/chain"
+
+  val checkRoute = pathSingleSlash { get { complete { Check("OK")} } }
+
+  val askRoute = path("ask") { get { complete { ChainDownstream(myStoryPart)} } }
+
+  val chainRoute =
+    path("chain") {
+      post {
+        entity(as[ChainUpstream]) { up =>
+          val depth = up.currentDepth
+          Kamon.currentSpan().tag("depth", depth.toString)
+          Kamon.currentSpan().tag("storyPart", myStoryPart)
+          if (depth<up.maxDepth) {
+            complete {
+              val nextUp=up.copy(currentDepth=depth+1)
+              val resp = remoteCall(nextUp, myNeighBorTargetURI)
+              Unmarshal(resp).to[ChainDownstream]
+              resp
             }
+          } else {
+            complete { ChainDownstream(myStoryPart) }
           }
         }
       }
-    val bindingFuture = Http().bindAndHandle(checkRoute~chainRoute, "0.0.0.0", 8080)
+    }
+
+  def main(args:Array[String]) {
+    val routes = checkRoute~chainRoute~askRoute
+    val bindingFuture = Http().bindAndHandle(routes, "0.0.0.0", 8080)
   }
 }
