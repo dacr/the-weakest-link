@@ -35,10 +35,11 @@ object Dummy {
   case class ChainUpstream(maxDepth:Int=2, currentDepth:Int=0)
   case class ChainDownstream(story:String)
 
-  def remoteCall(up:ChainUpstream, uri:String):Future[HttpResponse] = {
-    Marshal(up).to[RequestEntity].flatMap{ entity =>
+  def remoteCall(up:ChainUpstream, uri:String):Future[ChainDownstream] = {
+    val futureResponse = Marshal(up).to[RequestEntity].flatMap{ entity =>
       Http().singleRequest(HttpRequest(uri = uri, method = HttpMethods.POST, entity = entity))
     }
+    futureResponse.flatMap{ resp => Unmarshal(resp.entity).to[ChainDownstream] }
   }
 
   def myStoryPart = "... "             // TODO :
@@ -61,9 +62,8 @@ object Dummy {
           if (depth<up.maxDepth) {
             complete {
               val nextUp=up.copy(currentDepth=depth+1)
-              val resp = remoteCall(nextUp, myNeighBorTargetURI)
-              Unmarshal(resp).to[ChainDownstream]
-              resp
+              val futureResponse = remoteCall(nextUp, myNeighBorTargetURI)
+              futureResponse.map(resp => resp.copy(story = resp.story.trim+" "+myStoryPart))
             }
           } else {
             complete { ChainDownstream(myStoryPart) }

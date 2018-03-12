@@ -54,7 +54,7 @@ This small challenge will show your various tools in action :
 * Starts the http asynchronous server :
     + `sbt run`
 * Check if it works fine
-    + `curl http://localhost:8080`
+    + `curl -s http://localhost:8080`
         - should return `{"status":"OK"}`
 
 ---
@@ -62,12 +62,9 @@ This small challenge will show your various tools in action :
 ## Instructions
 ### Step 3 - Debug phasis
 
-* Check your connectivity with your neighbor
+* Check your connectivity with your neighbor and get its story part
     ```bash
-     curl -vs \
-       -H 'content-type: application/json' \
-       -d '{"messages":[]}' \
-       http://localhost:8080/chain
+     curl -s http://localhost:8080/ask
     ```
 
 * If something goes wrong we'll have to add logs...
@@ -138,6 +135,12 @@ rate(akka_system_active_actors_sum[5m])
 ---
 
 ## Notes for the game administrators
+
+### Ask your neightbor story part 
+
+```bash
+curl -s http://localhost:8080/ask | jq
+```
 ### Full chain request
 
 ```bash
@@ -146,3 +149,4 @@ curl -s \
   -d '{"maxDepth":2}' \
   http://localhost:8080/chain | jq
 ```
+
