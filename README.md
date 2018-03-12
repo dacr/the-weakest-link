@@ -40,7 +40,7 @@ This small challenge will show your various tools in action :
 ### Step 1 - Configure
 
 * Edit `src/main/resources/application.conf`
-  + change `kamon.environment.service` to your CUID 
+  + change `kamon.environment.instance` to your CUID 
   + Change jaeger IP from `localhost` to the IP we gave you
 * Edit `src/main/scala/dummy/Dummy.scala`
   + Change `myStoryPart` text to what ever you want (with humor)
