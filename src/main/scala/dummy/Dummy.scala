@@ -8,6 +8,8 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.unmarshalling.Unmarshal
 
+import better.files._
+
 import kamon.Kamon
 import kamon.jaeger.JaegerReporter
 import kamon.prometheus.PrometheusReporter
@@ -42,11 +44,14 @@ object Dummy {
     futureResponse.flatMap{ resp => Unmarshal(resp.entity).to[ChainDownstream] }
   }
 
-  def myStoryPart = "... "             // TODO :
-
+  def myStoryPart:String = {
+    val storyFile=file"myStoryPart.txt"
+    if (!storyFile.exists) { storyFile.createIfNotExists().appendText("undefined")}
+    storyFile.lines.map(_.trim).mkString(" ")
+  }
   val myNeighborIp = "127.0.0.1"       // TODO :
-
   val myNeighBorTargetURI= s"http://$myNeighborIp:8080/chain"
+
 
   val checkRoute = pathSingleSlash { get { complete { Check("OK")} } }
 
@@ -73,7 +78,9 @@ object Dummy {
     }
 
   def main(args:Array[String]) {
+    logger.info("Application starting")
     val routes = checkRoute~chainRoute~askRoute
     val bindingFuture = Http().bindAndHandle(routes, "0.0.0.0", 8080)
+    bindingFuture.map( _=> logger.info("Application started"))
   }
 }
