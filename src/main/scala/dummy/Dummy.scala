@@ -20,6 +20,14 @@ import de.heikoseeberger.akkahttpjson4s._
 import Json4sSupport._
 import org.json4s.{ DefaultFormats, jackson }
 
+
+case class Check(status:String)
+
+case class ChainUpstream(maxDepth:Int = 0, currentDepth:Int = 0, failDepth:Int = -1)
+
+case class ChainDownstream(story:String)
+
+
 object Dummy {
   val logger = org.slf4j.LoggerFactory.getLogger(getClass)
 
@@ -33,10 +41,6 @@ object Dummy {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  case class Check(status:String)
-  case class ChainUpstream(maxDepth:Int=2, currentDepth:Int=0)
-  case class ChainDownstream(story:String)
-
   def remoteCall(up:ChainUpstream, uri:String):Future[ChainDownstream] = {
     val futureResponse = Marshal(up).to[RequestEntity].flatMap{ entity =>
       Http().singleRequest(HttpRequest(uri = uri, method = HttpMethods.POST, entity = entity))
@@ -45,17 +49,40 @@ object Dummy {
   }
 
   def myStoryPart:String = {
-    val storyFile=file"myStoryPart.txt"
+    val storyFile = file"myStoryPart.txt"
     if (!storyFile.exists) { storyFile.createIfNotExists().appendText("undefined")}
     storyFile.lines.map(_.trim).mkString(" ")
   }
-  val myNeighborIp = "127.0.0.1"       // TODO :
+  val myNeighborIp = "localhost"       // TODO : Change with your neighbor IP
   val myNeighBorTargetURI= s"http://$myNeighborIp:8080/chain"
 
 
-  val checkRoute = pathSingleSlash { get { complete { Check("OK")} } }
+  val checkRoute =
+    pathSingleSlash {
+      get {
+        complete {
+          Check("OK")
+        }
+      }
+    }
 
-  val askRoute = path("ask") { get { complete { ChainDownstream(myStoryPart)} } }
+  val askRoute =
+    path("ask") {
+      get {
+        complete {
+          ChainDownstream(myStoryPart)
+        }
+      }
+    }
+
+  val askNextRoute =
+    path("asknext") {
+      get {
+        complete {
+          remoteCall(ChainUpstream(), myNeighBorTargetURI)
+        }
+      }
+    }
 
   val chainRoute =
     path("chain") {
@@ -64,6 +91,7 @@ object Dummy {
           val depth = up.currentDepth
           Kamon.currentSpan().tag("depth", depth.toString)
           Kamon.currentSpan().tag("storyPart", myStoryPart)
+          if (up.failDepth>=0 && depth==up.failDepth) throw new RuntimeException("ISSUE")
           if (depth<up.maxDepth) {
             complete {
               val nextUp=up.copy(currentDepth=depth+1)
@@ -79,7 +107,7 @@ object Dummy {
 
   def main(args:Array[String]) {
     logger.info("Application starting")
-    val routes = checkRoute~chainRoute~askRoute
+    val routes = checkRoute~chainRoute~askRoute~askNextRoute
     val bindingFuture = Http().bindAndHandle(routes, "0.0.0.0", 8080)
     bindingFuture.map( _=> logger.info("Application started"))
   }
