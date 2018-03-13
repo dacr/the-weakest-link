@@ -103,6 +103,7 @@ This small challenge will also show your various techs & tools in action :
 ### Step 5 - Let's monitor everything
 
 * Give me your IP
+  + for me to setup my prometheus instance
 * Browse to Grafana user interface
 * Let's build a dashboard
 
