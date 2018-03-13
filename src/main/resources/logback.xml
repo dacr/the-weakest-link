@@ -1,32 +1,38 @@
-<configuration scan="true" scanPeriod="45 seconds">
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration
+        scan="false"
+        scanPeriod="45 seconds"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://www.padual.com/java/logback.xsd"
+>
 
-	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${log.application.output:-dummy.log}</file>
-    <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-      <fileNamePattern>${log.application.output:-dummy.log}.%i</fileNamePattern>
-      <minIndex>1</minIndex>
-      <maxIndex>10</maxIndex>
-    </rollingPolicy>
-    <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-      <maxFileSize>20MB</maxFileSize>
-    </triggeringPolicy>
-    <encoder>
-      <pattern>%date %level [%thread] %logger{10} [%X{traceId}] %msg%n</pattern>
-    </encoder>
-	</appender>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.application.output:-dummy.log}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${log.application.output:-dummy.log}.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>10</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>20MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"application":"theWeakestLink"}</customFields>
+        </encoder>
+    </appender>
 
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
-    <encoder>
-      <pattern>%date %level [%thread] %logger{10} [%X{traceId}] %msg%n</pattern>
-    </encoder>
-  </appender>
+    
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"application":"theWeakestLink"}</customFields>
+        </encoder>
+    </appender>
+    
+    <logger name="ch.qos.logback" level="WARN"/>
 
-  <logger name="ch.qos.logback" level="WARN" />
+    <root level="${log.root.level:-INFO}">
+        <appender-ref ref="FILE"/>
+    </root>
 
-  <root level="${log.root.level:-INFO}">
-    <appender-ref ref="FILE"/>
-  </root>
-  
 
 </configuration>
