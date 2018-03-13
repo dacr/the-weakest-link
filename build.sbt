@@ -1,4 +1,4 @@
-name := "the-weak-link-app"
+name := "the-weakest-link"
 organization := "org.dummy"
 version := "0.0.1-SNAPSHOT"
 

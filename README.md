@@ -1,26 +1,32 @@
-# OESW - The Weakest Link challenge - app source code
-The sound track : https://www.youtube.com/watch?v=VJnm43i6Rr4 
+# The Weakest Link challenge
 
 Let’s discover the distributed tracing system named Jaeger (https://github.com/jaegertracing/jaeger)
-through a game inspired from the “Weakest Link” (TV game show).
-The idea is during the OESW days ask anyone with a laptop, to come and join us for this game,
-and we will try to interconnect our computers to build the longest chain, each of us adding
-a new message.
+through a game inspired from "The Weakest Link" (TV game show).
+
+Interested people can join the game, the only requirement is to have a laptop.
+During the session, we will try to interconnect our computers to build the longest
+chain(s) each of us completing a story by only knowing his nearest neighbor part.
+
 Once the chain is up, we’ll send the initial HTTP request (JSON POST), and thanks to the Jaeger
-User interface every-body will be able to take a look to the global trace and find who was the
-current weakest link ! (We’ll have to tell someone to change his code…)
+User interface every-body will be able to take a look to the global trace and find out who was the
+current weakest link ! (with high response times or errors)
+
+The sound track : https://www.youtube.com/watch?v=VJnm43i6Rr4 
 
 ---
 
 ## Introduction
 
-This small challenge will show your various tools in action :
+This small challenge will also show your various techs & tools in action :
 + [akka-http web framework](https://doc.akka.io/docs/akka-http/current/index.html)
 + [Kamon monitoring toolkit](http://kamon.io/documentation/get-started/)
 + [Jaeger distributed tracing](https://jaeger.readthedocs.io/en/latest/)
 + [Prometheus](https://prometheus.io/)
++ [Grafana](https://grafana.com/)
 + [Scala language](https://www.scala-lang.org/)
 + [Sbt build tool](https://www.scala-sbt.org/)
++ [better-files](https://github.com/pathikrit/better-files), 
+  [json4s](http://json4s.org/), ...
 
 ---
 
@@ -31,19 +37,18 @@ This small challenge will show your various tools in action :
   + Connect to the provided 4G router
 * Install SBT
   + https://www.scala-sbt.org/
-* Get the `oesw-the-weak-link-app` application source code
-  + `git clone https://gitlab.forge.orange-labs.fr/rhzj7430/oesw-the-weak-link-app`  
+* Get the `the-weakest-link` application source code
+  + from github : `git clone https://github.com/dacr/the-weakest-link.git`
 
 ---
 
 ## Instructions
 ### Step 1 - Configure
 
-* Edit `src/main/resources/application.conf`
-  + change `kamon.environment.instance` to your CUID 
+* Edit `src/main/resources/application.conf` (**Check TODO comments**)
+  + Change `kamon.environment.service` to your personal ID
   + Change jaeger IP from `localhost` to the IP we gave you
-* Edit `src/main/scala/dummy/Dummy.scala`
-  + Change `myStoryPart` text to what ever you want (with humor)
+* Edit `src/main/scala/dummy/Dummy.scala` (**Check TODO comment**)
   + Change `myNeighborIp` localhost to the IP of your nearest neighbor 
 
 ---
@@ -51,7 +56,7 @@ This small challenge will show your various tools in action :
 ## Instructions
 ### Step 2 - Start the app
 
-* Starts the http asynchronous server :
+* Starts the http asynchronous service :
     + `sbt run`
 * Check if it works fine
     + `curl -s http://localhost:8080`
@@ -60,16 +65,23 @@ This small challenge will show your various tools in action :
 ---
 
 ## Instructions
-### Step 3 - Debug phasis
+### Step 3 - Customize the story
 
-* Check your connectivity with your neighbor and get its story part
+* Check the connectivity with your neighbor, and get its story part
+    ```bash
+     curl -s http://localhost:8080/asknext
+    ```
+
+* Build your own story part by continuing what your neighbor has written
+  + Edit the file `myStoryPart.txt`
+    - automatically generated on service first start
+    - prefilled with a message : `undefined-MyHostName`
+  + Of course you will have to wait for your neighbor to have his file
+    updated with his own story part.
+* Check your own story part :
     ```bash
      curl -s http://localhost:8080/ask
     ```
-
-* If something goes wrong we'll have to add logs...
-  + Or check prometheus end point :
-    - http://localhost:9095/
 
 ---
 
@@ -77,13 +89,22 @@ This small challenge will show your various tools in action :
 ### Step 4 - Who is the weakest Link ?
 
 * I'll send the first http POST request
-* If everything goes thing :
-  + Go to Jaeger UI :
-    - Using provided URL 
+* **Let's read the global story :)**
+* Browse to Jaeger user interface to answer :
+  + Who is the slowest link ?
+  + If some error was encountered, who is the guilty link ?
 
 ---
 
-## Notes for the game administrators
+## Instructions
+### Step 5 - Let's monitor everything
+
+* Give me your IP
+* Browse to Grafana user interface
+
+---
+
+## Notes for the challenge administrators
 ### Start Jaeger
 
 ```
@@ -104,7 +125,7 @@ Browse to IP:16686 to reach the Jaeger user interface.
 
 ---
 
-## Notes
+## Notes for the challenge administrators
 ### Start Prometheus & grafana
 
 A simple prometheus.yml file for this app is in the git repository
@@ -121,26 +142,15 @@ docker run -d --name=grafana -p 0.0.0.0:3000:3000 grafana/grafana
 
 ---
 
-## Notes for the game administrators
+## Notes for the challenge administrators
 ### Prometheus/grafana queries example
 
 ```
 rate(akka_http_server_open_connections_sum[5m])
 rate(akka_http_server_active_requests_sum[5m])
 rate(akka_system_active_actors_sum[5m])
-
 ```
 
-
----
-
-## Notes for the game administrators
-
-### Ask your neightbor story part 
-
-```bash
-curl -s http://localhost:8080/ask | jq
-```
 ### Full chain request
 
 ```bash
@@ -149,4 +159,3 @@ curl -s \
   -d '{"maxDepth":2}' \
   http://localhost:8080/chain | jq
 ```
-
