@@ -26,7 +26,10 @@ This small challenge will also show your various techs & tools in action :
 + [Scala language](https://www.scala-lang.org/)
 + [Sbt build tool](https://www.scala-sbt.org/)
 + [better-files](https://github.com/pathikrit/better-files), 
-  [json4s](http://json4s.org/), ...
+  [json4s](http://json4s.org/),
+  [logback](https://logback.qos.ch/),
+  [logstash-logback-encoder](https://github.com/logstash/logstash-logback-encoder),
+  ...
 
 ---
 
@@ -101,6 +104,7 @@ This small challenge will also show your various techs & tools in action :
 
 * Give me your IP
 * Browse to Grafana user interface
+* Let's build a dashboard
 
 ---
 
@@ -145,17 +149,44 @@ docker run -d --name=grafana -p 0.0.0.0:3000:3000 grafana/grafana
 ## Notes for the challenge administrators
 ### Prometheus/grafana queries example
 
+Some prometheus query examples :
 ```
 rate(akka_http_server_open_connections_sum[5m])
 rate(akka_http_server_active_requests_sum[5m])
 rate(akka_system_active_actors_sum[5m])
 ```
 
+---
+
+## Notes for the challenge administrators
+### Prometheus/grafana template
+
+Template variable configuration :
+```
+Variable Name : InstanceName
+Query : label_values(akka_http_server_open_connections_sum, instance)
+Include All option : Enabled
+```
+
+Grafana graph configuration with template
+```
+A: rate(akka_http_server_open_connections_sum{instance=~"$InstanceName"}[5m])
+Legend Format : {{ instance }}
+```
+
+## Notes for the challenge administrators
 ### Full chain request
 
 ```bash
 curl -s \
   -H 'content-type: application/json'   \
-  -d '{"maxDepth":2}' \
+  -d '{"maxDepth":20}' \
+  http://localhost:8080/chain | jq
+```
+
+```bash
+curl -s \
+  -H 'content-type: application/json'   \
+  -d '{"maxDepth":20, "failDepth":2}' \
   http://localhost:8080/chain | jq
 ```
