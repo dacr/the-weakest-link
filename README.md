@@ -42,6 +42,7 @@ This small challenge will also show your various techs & tools in action :
   + https://www.scala-sbt.org/
 * Get the `the-weakest-link` application source code
   + from github : `git clone https://github.com/dacr/the-weakest-link.git`
+* Check your java release, a not too old 1.8 jvm is required
 
 ---
 
