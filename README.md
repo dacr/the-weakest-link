@@ -33,35 +33,35 @@ This small challenge will also show your various techs & tools in action :
 
 ---
 
-## Instructions
+## Instructions with binaries
 ### Step 0 - Prerequisites
 
 * Check you internet access
   + Connect to the provided 4G router
-* Install SBT
-  + https://www.scala-sbt.org/
-* Get the `the-weakest-link` application source code
-  + from github : `git clone https://github.com/dacr/the-weakest-link.git`
+* Get the `the-weakest-link` binaries
+  + `tar xvfz the-weakest-link-0.0.1-SNAPSHOT.tgz`
 * Check your java release, a not too old 1.8 jvm is required
 
 ---
 
-## Instructions
+## Instructions with binaries
 ### Step 1 - Configure
 
-* Edit `src/main/resources/application.conf` (**Check TODO comments**)
-  + Change `kamon.environment.service` to your personal ID
-  + Change jaeger IP from `localhost` to the IP we gave you
-* Edit `src/main/scala/dummy/Dummy.scala` (**Check TODO comment**)
-  + Change `myNeighborIp` localhost to the IP of your nearest neighbor 
+```
+export JAVA_OPTS="
+   -Dweakest-link.neighbor=127.0.0.1
+   -Dkamon.environment.service=YOUR_CHOSEN_UNIK_SVC_ID
+   -Dkamon.jaeger.host=127.0.0.1
+   "
+```
 
 ---
 
-## Instructions
+## Instructions with binaries
 ### Step 2 - Start the app
 
-* Starts the http asynchronous service :
-    + `sbt run`
+* Starts the weakest link application :
+    + `./the-weakest-link-0.0.1-SNAPSHOT/bin/the-weakest-link`
 * Check if it works fine
     + `curl -s http://localhost:8080`
         - should return `{"status":"OK"}`
@@ -190,5 +190,12 @@ curl -s \
 curl -s \
   -H 'content-type: application/json'   \
   -d '{"maxDepth":20, "failDepth":2}' \
+  http://localhost:8080/chain | jq
+```
+
+```bash
+curl -s \
+  -H 'content-type: application/json'   \
+  -d '{"maxDepth":5, "slowDepth":2}' \
   http://localhost:8080/chain | jq
 ```

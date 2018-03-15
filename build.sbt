@@ -7,6 +7,7 @@ scalaVersion := "2.12.4"
 libraryDependencies ++= Seq(
   "com.github.pathikrit"  %% "better-files"              % "3.4.0",
   "ch.qos.logback"         % "logback-classic"           % "1.2.3",
+  "org.codehaus.janino"    % "janino"                    % "3.0.6",
   "net.logstash.logback"   % "logstash-logback-encoder"  % "5.0",
   "org.scalatest"         %% "scalatest"                 % "3.0.5" % "test",
 )
@@ -24,4 +25,12 @@ libraryDependencies ++= Seq(
   "io.kamon"          %% "kamon-logback"         % "1.0.0",
   "de.heikoseeberger" %% "akka-http-json4s"      % "1.20.0",
   "org.json4s"        %% "json4s-jackson"        % "3.5.3",
+)
+
+enablePlugins(JavaAppPackaging, JavaAgent)
+
+javaAgents += "org.aspectj" % "aspectjweaver" % "1.8.13"
+
+javaOptions in Universal ++= Seq(
+  "-Dorg.aspectj.tracing.factory=default"
 )

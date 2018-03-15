@@ -7,7 +7,7 @@
 >
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log.application.output:-dummy.log}</file>
+        <file>${log.application.output:-the-weakest-link.log}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <fileNamePattern>${log.application.output:-dummy.log}.%i</fileNamePattern>
             <minIndex>1</minIndex>
